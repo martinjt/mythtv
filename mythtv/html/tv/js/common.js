@@ -1,4 +1,3 @@
-
 function jq(id) // F*%$ jQuery
 {
     return "#" + id.replace( /(:|\.|\[|\])/g, "\\$1" );
@@ -559,3 +558,13 @@ function dissolveTransition(oldDivID, newDivID)
                    $("#" + oldDivID).remove(); postLoad(); });
     $("#" + newDivID).animate({opacity: "1.0"}, 800);
 }
+
+function handleKeyboardShortcutsTV(key)
+{
+    if (key.keyCode == 27)
+    {
+        hideMenu("optMenu");
+    }
+}
+
+
