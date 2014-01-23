@@ -21,6 +21,7 @@
 #include "datacontracts/videoMetadataInfoList.h"
 #include "datacontracts/videoLookupInfoList.h"
 #include "datacontracts/blurayInfo.h"
+#include "datacontracts/seriesInfoList.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -56,6 +57,7 @@ class SERVICE_PUBLIC VideoServices : public Service  //, public QScriptable ???
             DTC::VideoMetadataInfoList::InitializeCustomTypes();
             DTC::VideoLookupList::InitializeCustomTypes();
             DTC::BlurayInfo::InitializeCustomTypes();
+            DTC::SeriesInfoList::InitializeCustomTypes();
         }
 
     public slots:
@@ -67,6 +69,10 @@ class SERVICE_PUBLIC VideoServices : public Service  //, public QScriptable ???
                                                                  bool             Descending,
                                                                  int              StartIndex,
                                                                  int              Count      ) = 0;
+
+        virtual DTC::SeriesInfoList*        GetSeriesList      ( bool IncludeSeasons,
+                                                                 int Inetref ) = 0;
+
 
         virtual DTC::VideoMetadataInfo*     GetVideo           ( int              Id         ) = 0;
 

@@ -14,7 +14,10 @@ QMAKE_CLEAN += version.cpp
 
 # Input
 
-HEADERS += serviceexp.h service.h datacontracthelper.h
+HEADERS += serviceexp.h service.h datacontracthelper.h \
+    datacontracts/seriesInfo.h \
+    datacontracts/seasonInfo.h \
+    datacontracts/seriesInfoList.h
 
 HEADERS += services/mythServices.h    services/guideServices.h
 HEADERS += services/contentServices.h services/dvrServices.h
@@ -42,6 +45,8 @@ HEADERS += datacontracts/artworkInfoList.h       datacontracts/frontendStatus.h
 HEADERS += datacontracts/frontendActionList.h
 HEADERS += datacontracts/liveStreamInfo.h        datacontracts/liveStreamInfoList.h
 HEADERS += datacontracts/titleInfo.h             datacontracts/titleInfoList.h
+HEADERS +=       
+HEADERS +=
 HEADERS += datacontracts/labelValue.h
 HEADERS += datacontracts/logMessage.h            datacontracts/logMessageList.h
 HEADERS += datacontracts/imageMetadataInfoList.h datacontracts/imageMetadataInfo.h
@@ -88,6 +93,8 @@ incDatacontracts.files += datacontracts/artworkInfo.h         datacontracts/artw
 incDatacontracts.files += datacontracts/frontendStatus.h      datacontracts/frontendActionList.h
 incDatacontracts.files += datacontracts/liveStreamInfo.h      datacontracts/liveStreamInfoList.h
 incDatacontracts.files += datacontracts/titleInfo.h           datacontracts/titleInfoList.h
+incDatacontracts.files += datacontracts/tvShowInfo.h          datacontracts/tvShowInfoList.h
+incDatacontracts.files += datacontracts/tvSeasonInfo.h
 incDatacontracts.files += datacontracts/labelValue.h
 incDatacontracts.files += datacontracts/logMessage.h          datacontracts/logMessageList.h
 incDatacontracts.files += datacontracts/imageMetadataInfoList.h datacontracts/imageMetadataInfo.h

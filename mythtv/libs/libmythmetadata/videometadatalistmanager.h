@@ -17,6 +17,7 @@ class META_PUBLIC VideoMetadataListManager
     static VideoMetadataPtr loadOneFromDatabase(uint id);
     static void loadAllFromDatabase(metadata_list &items,
                                     const QString &sql = "");
+    vector<VideoMetadata *> getTVList(metadata_list &list);
 
   public:
     VideoMetadataListManager();

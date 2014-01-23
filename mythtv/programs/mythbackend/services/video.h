@@ -50,6 +50,9 @@ class Video : public VideoServices
                                                        int            StartIndex,
                                                        int            Count      );
 
+        DTC::SeriesInfoList*      GetSeriesList      ( bool IncludeSeasons,
+                                                       int Inetref );
+
         DTC::VideoMetadataInfo*   GetVideo           ( int      Id               );
 
         DTC::VideoMetadataInfo*   GetVideoByFileName ( const QString  &FileName  );
@@ -112,6 +115,12 @@ class ScriptableVideo : public QObject
                                      int              Count      )
         {
             return m_obj.GetVideoList(Folder, Sort, Descending, StartIndex, Count );
+        }
+
+        QObject* GetSeriesList( bool IncludeSeasons,
+                                int Inetref )
+        {
+            return m_obj.GetSeriesList( IncludeSeasons, Inetref );
         }
 
         QObject* GetVideo(       int              Id         )

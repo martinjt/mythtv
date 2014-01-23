@@ -125,6 +125,77 @@ DTC::VideoMetadataInfoList* Video::GetVideoList( const QString &Folder,
 //
 /////////////////////////////////////////////////////////////////////////////
 
+DTC::SeriesInfoList *Video::GetSeriesList( bool bIncludeSeasons,
+                                           int nInetref )
+{
+    MSqlQuery query(MSqlQuery::InitCon());
+
+    QString querystr = QString(
+                "SELECT title, inetref, season, COUNT(episode), MAX(episode), fanart, banner, coverfile "
+                "FROM videometadata ");
+    if (nInetref != 0)
+    {
+        querystr.append("WHERE inetref = '");
+        querystr.append(QString::number(nInetref));
+        querystr.append("' AND fanart != \"\" ");
+    }
+    else
+    {
+        querystr.append("WHERE inetref != '00000000' AND contenttype = \"TELEVISION\" AND fanart != \"\" ");
+    }
+    querystr.append(
+                "GROUP BY inetref, season, fanart, banner, coverfile "
+                "ORDER BY title, season, MAX(episode)");
+
+    query.prepare(querystr);
+
+    DTC::SeriesInfoList *pShowInfos = new DTC::SeriesInfoList();
+    if (!query.exec())
+    {
+        MythDB::DBError("ServiceAPI: Error getting series list", query);
+        return pShowInfos;
+    }
+    DTC::SeriesInfo *pShowInfo = NULL;
+    DTC::SeasonInfo *pSeasonInfo = NULL;
+    int lastSeason = 0;
+    while (query.next())
+    {
+        if (pShowInfo == NULL || pShowInfo->Inetref() != query.value(1).toString())
+        {
+            pShowInfo = pShowInfos->AddNewTVShowInfo();
+            pShowInfo->setTitle(query.value(0).toString());
+            pShowInfo->setInetref(query.value(1).toString());
+            pShowInfo->AddNewArtworkInfo("fanart", query.value(5).toString());
+            pShowInfo->AddNewArtworkInfo("banner", query.value(6).toString());
+            pShowInfo->AddNewArtworkInfo("coverart", query.value(7).toString());
+            lastSeason = 0;
+        }
+
+        if (bIncludeSeasons)
+        {
+            if (lastSeason != query.value(2).toInt())
+                pSeasonInfo = pShowInfo->AddNewSeasonInfo();
+
+            int episodeCount = pSeasonInfo->TotalEpisodes();
+            episodeCount += query.value(3).toInt();
+
+            pSeasonInfo->setNumber(query.value(2).toInt());
+            pSeasonInfo->setTotalEpisodes(episodeCount);
+            pSeasonInfo->AddNewArtworkInfo("fanart", query.value(5).toString());
+            pSeasonInfo->AddNewArtworkInfo("banner", query.value(6).toString());
+            pSeasonInfo->AddNewArtworkInfo("coverart", query.value(7).toString());
+        }
+    }
+
+    return pShowInfos;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+/////////////////////////////////////////////////////////////////////////////
+
 DTC::VideoMetadataInfo* Video::GetVideo( int Id )
 {
     VideoMetadataListManager::VideoMetadataPtr metadata =
