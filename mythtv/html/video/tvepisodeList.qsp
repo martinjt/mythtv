@@ -1,0 +1,35 @@
+<%
+"use strict";
+
+import "/js/utility.js"
+import "/tv/js/constants.js"
+
+    var args = arguments[1];
+    function getArg(name)
+    {
+        name = name.toLowerCase();
+        return args[name];
+    }
+
+    var inetref = parseInt(getArg("Inetref"), 0);
+    var season = parseInt(getArg("Season"), 0);
+    var video = new Video();
+
+    var episodes = video.GetVideoList("", "", inetref, season, false, 0, 0).VideoMetadataInfos;
+    if (episodes.length)
+    {
+        for (var idx = 0; idx < episodes.length; idx++)
+        {
+            var episode = episodes[idx];
+%>
+<div class="episode" data-episode-number="<%=episode.Episode%>">
+   <span class="episode-number"><%=episode.Episode%></span>
+   <span class="episode-subtitle"><%=episode.SubTitle%></span>
+</div>
+<%      }
+    }
+    else
+    {
+%>
+        There are no episodes for this Series/Season.
+<%  } %>

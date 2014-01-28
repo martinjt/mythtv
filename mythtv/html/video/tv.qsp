@@ -1,0 +1,192 @@
+<%
+    var video = Video();
+
+    var shows = video.GetSeriesList(true, 0).SeriesList;
+    var firstFanartUrl = shows[0].Seasons[0].Fanart.URL;
+    var firstInetref = shows[0].Inetref;
+    var firstSeason = shows[0].Seasons[0].Number;
+%>
+<div style="height:100%;">
+    <div id="showSelection" >
+        <ul id="coverartList">
+    <% for (var listIdx = 0; listIdx < shows.length; listIdx++)
+       {
+            var showName = shows[listIdx].Title;
+            var coverUrl = shows[listIdx].Seasons[0].Coverart.URL + "&Width=130";
+            var fanartUrl = shows[listIdx].Seasons[0].Fanart.URL;
+            var totalSeasons = shows[listIdx].Seasons.length;
+            var showSeason = shows[listIdx].Seasons[totalSeasons - 1].Number;
+    %>
+            <li data-fanart="<%=fanartUrl%>"
+                data-inetref="<%=shows[listIdx].Inetref%>"
+                data-show-season="<%=showSeason%>">
+                <img width="130" src="<%=coverUrl%>" alt="<%=showName%>" />
+            </li>
+    <% } %>
+        </ul>
+    </div>
+    <div id="showInformation">
+        <div id="seasonHolder"> </div>
+        <div id="episodeHolder"> </div>
+    </div>
+    <div id="videoBackground">
+        <img alt="" src="" />
+    <div>
+<div>
+
+<script type="text/javascript">
+    var currentFanartUrl;
+    $(document).ready(function() {
+        setBackground("<%=firstFanartUrl%>");
+        loadSeasons("<%=firstInetref%>");
+        loadEpisodes("<%=firstInetref%>", "<%=firstSeason%>");
+    });
+    $("#coverartList li").on('click', function(e) {
+        var fanartUrl = $(this).data("fanart");
+        var inetref = $(this).data("inetref");
+        var season = $(this).data("show-season");
+        setBackground(fanartUrl);
+        loadSeasons(inetref);
+        loadEpisodes(inetref, season);
+    });
+
+
+    function setBackground(fanartUrl)
+    {
+        currentFanartUrl = fanartUrl;
+        var width = isNaN(window.innerWidth) ? window.clientWidth : window.innerWidth;
+        var height = isNaN(window.innerHeight) ? window.clientHeight : window.innerHeight;
+        fanartUrl += "&Width=" + width + "&Height=" + height;
+        $("#videoBackground").css('background-image', "url('" + fanartUrl + "')");
+    }
+    function loadSeasons(inetref)
+    {
+        $("#seasonHolder").html(
+            $.ajax({
+                url: "/video/tvseason.qsp?inetref=" + inetref,
+                async: false,
+                }).responseText);
+        setupSeasonClicks();
+    }
+    function setupSeasonClicks() {
+        $("#seasonHolder .seasonBanner").on('click', function(e) {
+            var fanartUrl = $(this).data("fanart");
+            var inetref = $(this).data("inetref");
+            var season = $(this).data("season-number");
+            setBackground(fanartUrl);
+            loadEpisodes(inetref, season);
+        });
+    }
+    function loadEpisodes(inetref, season)
+    {
+        $("#episodeHolder").html(
+            $.ajax({
+                url: "/video/tvepisodeList.qsp?inetref=" + inetref + "&season=" + season,
+                async: false,
+                }).responseText);
+    }
+</script>
+
+<style>
+#showSelection {
+    height: 100%;
+    float: left;
+}
+#showInformation {
+    text-align: center;
+    margin-left: 200px;
+    right: 0;
+    min-width:500px;
+}
+#seasonHolder {
+    max-height: 156px;
+    overflow-y: auto;
+}
+#episodeHolder {
+    top: 176px;
+    bottom: 10px;
+    width:50%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position:absolute;
+}
+#content {
+    position: absolute;
+    bottom: 0;
+    top:50px;
+}
+#coverart {
+    z-index: 100;
+    height: 100%;
+    width: 180px;
+}
+#videoBackground {
+    z-index: -1;
+    position:fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width:100%;
+    height:100%;
+    background-size: cover;
+
+}
+#videoBackground img {
+    max-height:100%;
+    max-width: 100%;
+}
+#coverartList {
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    width: 150px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#coverartList li {
+    width:150px;
+    padding-bottom: 5px;
+}
+#coverartList li img {
+}
+#coverartList li div {
+    width: 150px;
+}
+.seasonBanner {
+    text-align: center;
+    width:400px;
+    display:inline-block;
+}
+.seasonBanner span {
+    font-size: 32px;
+    font-weight: bold;
+    width:400px;
+    z-index: 98;
+}
+.seasonBanner img {
+    width:400px;
+    margin-left: -200px;
+    height:74px;
+    background-size: cover;
+    z-index:99;
+}
+.episode {
+    width: 400px;
+    height: 40px;
+    background-color: black;
+    border-radius: 8px;
+    line-height: 40px;
+    margin-bottom: 3px;
+}
+.episode .episode-number {
+    float: left;
+    width: 100px;
+    font-size: 28px;
+}
+.episode .episode-subtitle {
+    float: left;
+}
+</style>
+

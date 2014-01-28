@@ -1,0 +1,42 @@
+<%
+"use strict";
+
+import "/js/utility.js"
+import "/tv/js/constants.js"
+
+    var args = arguments[1];
+    function getArg(name)
+    {
+        name = name.toLowerCase();
+        return args[name];
+    }
+
+    var inetref = parseInt(getArg("Inetref"), 0);
+
+    var video = new Video();
+
+    var seriesList = video.GetSeriesList(true, inetref).SeriesList;
+    if (seriesList.length)
+    {
+
+        var seasons = seriesList[0].Seasons;
+
+        for (var idx = 0; idx < seasons.length; idx++)
+        {
+            var bannerUrl = seasons[idx].Banner.URL;
+            var fanartUrl = seasons[idx].Fanart.URL;
+%>
+<div class="seasonBanner"
+        data-season-number="<%=seasons[idx].Number%>"
+        data-fanart="<%=fanartUrl%>"
+        data-inetref="<%=inetref%>" >
+        <span class="seasonName">Season <%=seasons[idx].Number%></span>
+   <img src="<%=bannerUrl%>" />
+</div>
+<%      }
+    }
+    else
+    {
+%>
+        There are no seasons for this Series.
+<%  } %>
