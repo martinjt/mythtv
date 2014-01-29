@@ -53,6 +53,12 @@ class Video : public VideoServices
         DTC::SeriesInfoList*      GetSeriesList      ( bool IncludeSeasons,
                                                        int Inetref );
 
+        DTC::VideoMetadataInfo*   UpdateVideo        ( int Id,
+                                                       const QString &Title,
+                                                       const QString &Subtitle,
+                                                       int nInetref,
+                                                       bool bTriggerUpdate );
+
         DTC::VideoMetadataInfo*   GetVideo           ( int      Id               );
 
         DTC::VideoMetadataInfo*   GetVideoByFileName ( const QString  &FileName  );
@@ -121,6 +127,15 @@ class ScriptableVideo : public QObject
                                 int Inetref )
         {
             return m_obj.GetSeriesList( IncludeSeasons, Inetref );
+        }
+
+        QObject* UpdateVideo( int Id,
+                              const QString &Title,
+                              const QString &Subtitle,
+                              int nInetref,
+                              bool bTriggerUpdate )
+        {
+            return m_obj.UpdateVideo(Id, Title, Subtitle, nInetref, bTriggerUpdate);
         }
 
         QObject* GetVideo(       int              Id         )

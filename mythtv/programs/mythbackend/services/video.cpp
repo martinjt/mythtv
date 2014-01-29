@@ -190,7 +190,62 @@ DTC::SeriesInfoList *Video::GetSeriesList( bool bIncludeSeasons,
     return pShowInfos;
 }
 
+DTC::VideoMetadataInfo* Video::UpdateVideo( int Id,
+                                            const QString &Title,
+                                            const QString &Subtitle,
+                                            int nInetref,
+                                            bool bTriggerUpdate)
+{
+    VideoMetadataListManager::VideoMetadataPtr metadata =
+                          VideoMetadataListManager::loadOneFromDatabase(Id);
 
+    if ( !metadata )
+        throw( QString( "No metadata found for selected ID!." ));
+
+    if (nInetref != 0)
+        metadata->SetInetRef(QString::number(nInetref));
+    if (!Title.isEmpty())
+        metadata->SetTitle(Title);
+    if (!Subtitle.isEmpty())
+        metadata->SetSubtitle(Subtitle);
+
+    if (bTriggerUpdate)
+    {
+        QString grabberType;
+        if (metadata->GetSeason() != 0)
+            grabberType = "TV";
+        else
+            grabberType = "Movie";
+
+        MetadataLookupList list;
+
+        MetadataFactory *factory = new MetadataFactory(NULL);
+
+        if (factory)
+            list = factory->SynchronousLookup(metadata->GetTitle(),
+                                              metadata->GetSubtitle(),
+                                              metadata->GetInetRef(),
+                                              metadata->GetSeason(),
+                                              metadata->GetEpisode(),
+                                              grabberType,
+                                              true);
+        if (list.count())
+            if (list[0])
+                metadata->UpdateFromMetadataLookup(list[0]);
+    }
+    else
+    {
+        metadata->UpdateDatabase();
+    }
+
+    metadata = VideoMetadataListManager::loadOneFromDatabase(Id);
+
+    DTC::VideoMetadataInfo *pVideoMetadataInfo = new DTC::VideoMetadataInfo();
+
+    FillVideoMetadataInfo ( pVideoMetadataInfo, metadata, true );
+
+    return pVideoMetadataInfo;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //

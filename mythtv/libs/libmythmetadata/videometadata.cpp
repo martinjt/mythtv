@@ -19,6 +19,7 @@
 #include "videometadatalistmanager.h"
 #include "videoutils.h"
 #include "programinfo.h" // for format_season_and_episode
+#include "metadatacommon.h"
 
 struct SortData
 {
@@ -351,6 +352,7 @@ class VideoMetadataImp
     bool IsHostSet() const;
 
     void GetImageMap(InfoMap &imageMap) const;
+    void UpdateFromMetadataLookup(MetadataLookup *lookup);
 
   private:
     void fillCountries();
@@ -953,6 +955,119 @@ void VideoMetadataImp::GetImageMap(InfoMap &imageMap) const
     if (!screenshotfile.isEmpty () && (GetSeason() > 0 || GetEpisode() > 0))
         smartimage = screenshotfile;
     imageMap["smartimage"] = smartimage;
+}
+void VideoMetadataImp::UpdateFromMetadataLookup(MetadataLookup *lookup)
+{
+    m_title = lookup->GetTitle();
+    m_subtitle = lookup->GetSubtitle();
+
+    if (m_tagline.isEmpty())
+        m_tagline = lookup->GetTagline();
+    if (m_year == 1895 || m_year == 0)
+        m_year = lookup->GetYear();
+    if (m_releasedate == QDate())
+        m_releasedate = lookup->GetReleaseDate();
+    if (m_director == VIDEO_DIRECTOR_UNKNOWN ||
+        m_director.isEmpty())
+    {
+        QList<PersonInfo> director = lookup->GetPeople(kPersonDirector);
+        if (director.count() > 0)
+            m_director = director.takeFirst().name;
+    }
+    if (m_studio.isEmpty())
+    {
+        QStringList studios = lookup->GetStudios();
+        if (studios.count() > 0)
+            m_studio = studios.takeFirst();
+    }
+    if (m_plot == VIDEO_PLOT_DEFAULT ||
+        m_plot.isEmpty())
+        m_plot = lookup->GetDescription();
+    if (m_userrating == 0)
+        m_userrating = lookup->GetUserRating();
+    if (m_rating == VIDEO_RATING_DEFAULT)
+        m_rating = lookup->GetCertification();
+    if (m_length == 0)
+        m_length = lookup->GetRuntime();
+    if (m_season == 0)
+        m_season = lookup->GetSeason();
+    if (m_episode == 0)
+        m_episode = lookup->GetEpisode();
+    if (m_homepage.isEmpty())
+        m_homepage = lookup->GetHomepage();
+
+    m_inetref = lookup->GetInetref();
+
+    // Cast
+    QList<PersonInfo> actors = lookup->GetPeople(kPersonActor);
+    QList<PersonInfo> gueststars = lookup->GetPeople(kPersonGuestStar);
+
+    for (QList<PersonInfo>::const_iterator p = gueststars.begin();
+        p != gueststars.end(); ++p)
+    {
+        actors.append(*p);
+    }
+
+    VideoMetadata::cast_list cast;
+    QStringList cl;
+
+    for (QList<PersonInfo>::const_iterator p = actors.begin();
+        p != actors.end(); ++p)
+    {
+        cl.append((*p).name);
+    }
+
+    for (QStringList::const_iterator p = cl.begin();
+        p != cl.end(); ++p)
+    {
+        QString cn = (*p).trimmed();
+        if (cn.length())
+        {
+            cast.push_back(VideoMetadata::cast_list::
+                        value_type(-1, cn));
+        }
+    }
+
+    m_cast = cast;
+
+    // Genres
+    VideoMetadata::genre_list video_genres;
+    QStringList genres = lookup->GetCategories();
+
+    for (QStringList::const_iterator p = genres.begin();
+        p != genres.end(); ++p)
+    {
+        QString genre_name = (*p).trimmed();
+        if (genre_name.length())
+        {
+            video_genres.push_back(
+                    VideoMetadata::genre_list::value_type(-1, genre_name));
+        }
+    }
+
+    m_genres = video_genres;
+
+    // Countries
+    VideoMetadata::country_list video_countries;
+    QStringList countries = lookup->GetCountries();
+
+    for (QStringList::const_iterator p = countries.begin();
+        p != countries.end(); ++p)
+    {
+        QString country_name = (*p).trimmed();
+        if (country_name.length())
+        {
+            video_countries.push_back(
+                    VideoMetadata::country_list::value_type(-1,
+                            country_name));
+        }
+    }
+
+    m_countries = video_countries;
+    m_processed = true;
+
+    UpdateDatabase();
+
 }
 
 ////////////////////////////////////////
@@ -1774,6 +1889,12 @@ void VideoMetadata::UpdateDatabase()
     m_imp->UpdateDatabase();
 }
 
+void VideoMetadata::UpdateFromMetadataLookup(MetadataLookup *lookup)
+{
+    m_imp->UpdateFromMetadataLookup(lookup);
+}
+
+
 bool VideoMetadata::DeleteFromDatabase()
 {
     return m_imp->DeleteFromDatabase();
@@ -1852,3 +1973,4 @@ bool operator<(const VideoMetadata::SortKey &lhs, const VideoMetadata::SortKey &
         return lhs.m_sd < rhs.m_sd;
     }
 }
+

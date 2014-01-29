@@ -73,6 +73,11 @@ class SERVICE_PUBLIC VideoServices : public Service  //, public QScriptable ???
         virtual DTC::SeriesInfoList*        GetSeriesList      ( bool IncludeSeasons,
                                                                  int Inetref ) = 0;
 
+        virtual DTC::VideoMetadataInfo*     UpdateVideo        ( int              Id,
+                                                                 const QString    &Title,
+                                                                 const QString    &Subtitle,
+                                                                 int              Inetref,
+                                                                 bool             TriggerUpdate ) = 0;
 
         virtual DTC::VideoMetadataInfo*     GetVideo           ( int              Id         ) = 0;
 

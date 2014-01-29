@@ -238,6 +238,8 @@ class META_PUBLIC VideoMetadata
     // drops the metadata from the DB
     bool DeleteFromDatabase();
 
+    void UpdateFromMetadataLookup(MetadataLookup *lookup);
+
 //    bool fillDataFromID(const VideoMetadataListManager &cache);
     bool FillDataFromFilename(const VideoMetadataListManager &cache);
 
